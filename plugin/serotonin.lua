@@ -18,5 +18,5 @@ for k, v in pairs(highlights) do
 end
 
 vim.api.nvim_create_user_command("Serotonin", function()
-  require("serotonin").start_simulation()
+  require("serotonin.render").render_frame({{{char = "x", hl_group = "type"}}})
 end, {})
