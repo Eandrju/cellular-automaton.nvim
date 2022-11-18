@@ -10,7 +10,7 @@ local get_dominant_hl_group = function (buffer, i, j)
     return ""
 end
 
-M.load_grid = function (window, buffer)
+M.load_base_grid = function (window, buffer)
     local view_range = {start = vim.fn.line('w0') - 1, end_ = vim.fn.line('w$')}
     -- initialize the grid
     local grid = {}
@@ -33,7 +33,10 @@ M.load_grid = function (window, buffer)
         end
     end
     return grid
+    -- return {
+    --     {{char = "%", hl_group = "type" }, {char = "x", hl_group = "type" }},
+    --     {{char = " ", hl_group = "" }, {char = "x", hl_group = "type" }}
+    -- }
 end
-
 
 return M

@@ -17,6 +17,7 @@ for k, v in pairs(highlights) do
   vim.api.nvim_set_hl(0, k, v)
 end
 
-vim.api.nvim_create_user_command("Serotonin", function()
-  require("serotonin.render").render_frame({{{char = "x", hl_group = "type"}}})
+vim.api.nvim_create_user_command("Serotonin", function(opts)
+  local sim_fn = require("serotonin.simulations.make_it_rain").update_state
+  require("serotonin").start_simulation(sim_fn)
 end, {})

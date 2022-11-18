@@ -1,26 +1,44 @@
 local M = {}
 
-local printer = require("serotonin.render")
-local loader = require("serotonin.load")
+local animations = {
+    make_it_rain = require("serotonin.animations.make_it_rain")
+}
 
-local function process_frame (grid, update_fn, clean_fn)
-    local state_changed = update_fn(grid)
-    printer.render_frame(grid)
-    if state_changed then
-        vim.defer_fn(
-            function() process_frame(grid, update_fn, clean_fn) end, 20
-        )
-    else
-        clean_fn()
+local apply_default_options = function (config)
+    local default = {
+        name = "",
+        update = function () end,
+        init = function () end,
+        context = {},
+        fps = 50,
+    }
+    for k, v in pairs(config) do
+        default[k] = v
     end
+    return default
 end
 
-M.start_simulation = function(update_fn)
-    local win_id = vim.api.nvim_get_current_win()
-    local buf_id = vim.api.nvim_get_current_buf()
-    local grid = loader.load_grid(win_id, buf_id)
-    printer.open_window(win_id)
-    process_frame(grid, update_fn, printer.clean)
+M.register_animation = function (config)
+    -- "module" should implement update_grid(grid) method which takes 2D "grid"
+    -- table of cells and update it inplace. Each "cell" is a table with following
+    -- fields {"hl_group", "char"}
+    if config.update_grid == nil then
+        error("Animation module must implement update_grid function")
+        return
+    end
+    if config.name == nil then
+        error("Animation module must have 'name' field")
+        return
+    end
+
+    animations[module.name] = apply_default_options(config)
+end
+
+M.start_animation = function(animation_name)
+    if animations[animation_name] == nil then
+        error("Unknown animation " .. animation_name)
+    end
+    require("serotonin.manager").execute_animation(animations[animation_name])
 end
 
 return M
