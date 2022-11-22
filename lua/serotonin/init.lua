@@ -1,7 +1,8 @@
 local M = {}
 
 local animations = {
-    make_it_rain = require("serotonin.animations.make_it_rain")
+    make_it_rain = require("serotonin.animations.make_it_rain"),
+    -- liquid = require("serotonin.animations.liquid")
 }
 
 local apply_default_options = function (config)

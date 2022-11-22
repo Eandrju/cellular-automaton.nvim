@@ -10,14 +10,15 @@ local get_cell_center = function (x, y)
     return x + 0.5,  y + 0.5
 end
 
+local frame
+
 M.init = function (grid)
     for i = 1, #grid do
         for j = 1, #(grid[i]) do
-            grid[i][j].x_speed = 1.
-            grid[i][j].y_speed = 0.
-            grid[i][j].x, grid[i][j].y =  get_cell_center(i, j)
+            grid[i][j].disperse_direction = 0
         end
     end
+    frame = 1
 end
 
 local cell_empty = function (grid, x, y)
@@ -33,14 +34,6 @@ local cell_empty = function (grid, x, y)
     return false
 end
 
-local is_free_space_under_cell = function (grid, x, y)
-     return (
-        cell_empty(grid, x - 1, y) or
-        cell_empty(grid, x - 1, y - 1) or
-        cell_empty(grid, x - 1, y + 1)
-     )
-end
-
 local swap_cells = function (grid, x1, y1, x2, y2)
     grid[x1][y1], grid[x2][y2] = grid[x2][y2], grid[x1][y1]
     -- grid[x1][y1].x, grid[x1][y1].y = get_cell_center(x1, y1)
@@ -48,118 +41,156 @@ local swap_cells = function (grid, x1, y1, x2, y2)
 end
 
 M.update = function (grid)
+    -- local updated_grid = vim.deepcopy(grid)
+    -- reset processed flag
+    for i = 1, #grid, 1 do
+        for j = 1, #(grid[i]) do
+            grid[i][j].processed = false
+        end
+    end
     -- P(grid)
-    local state_updated = false
+    local was_state_updated = false
     for x0 = #grid - 1, 1, -1 do
-        for y0 = 1, #(grid[x0]) do
+        for i = 1, #(grid[x0]) do
+            -- iterate through grid from bottom to top using snake move
+            -- >>>>>>>>>>>>
+            -- ^<<<<<<<<<<<
+            -- >>>>>>>>>>>^
+            frame = frame + 1
+            local y0
+            if (frame + x0) % 2 == 0 then
+                y0 = i
+            else
+                y0 = #(grid[x0]) + 1 - i
+            end
             local cell = grid[x0][y0]
 
-            -- skip spaces and comments
-            if cell.char == " " or string.find(cell.hl_group, "comment") then
+            -- skip spaces and comments or already proccessed cells
+            if cell.char == " "
+                or string.find(cell.hl_group, "comment")
+                or cell.processed == true then
                 goto continue
             end
 
-            -- #1 Case
-            -- x_speed is 0 and there is space beneath
-            -- if cell.x_speed ~= 0.123454325345 and is_free_space_under_cell(grid, x0, y0) then
-            --    state_updated = true
-            --    if cell_empty(grid, x0 + 1, y0) then
-            --        swap_cells(grid, x0, y0, x0 + 1, y0)
-            --        cell.x, cell.y = get_cell_center(x0 + 1, y0)
-            --        cell.x_speed = 1
-            --    elseif cell_empty(grid, x0 + 1, y0 - 1) then
-            --        swap_cells(grid, x0, y0, x0 + 1, y0 - 1)
-            --        cell.x, cell.y = get_cell_center(x0 + 1, y0 - 1)
-            --        cell.x_speed = 1
-            --        cell.y_speed = -1 -- oui
-            --    elseif cell_empty(grid, x0 + 1, y0 + 1) then
-            --        swap_cells(grid, x0, y0, x0 + 1, y0 + 1)
-            --        cell.x, cell.y = get_cell_center(x0 + 1, y0 + 1)
-            --        cell.x_speed = 1
-            --        cell.y_speed = 1 -- bulshit
-            --    end
-            --    goto continue
-            -- end
+            cell.processed = true
 
-            -- #2 Case
-            -- x_speed is non zero
+            -- to introduce some randomness sometimes step aside
+            local random = math.random()
+            if random < 0.05 then
+                was_state_updated = true
+                if cell_empty(grid, x0, y0 + 1) then
+                    swap_cells(grid, x0, y0, x0, y0 + 1)
+                end
+            elseif random < 0.1 then
+                was_state_updated = true
+                if cell_empty(grid, x0, y0 - 1) then
+                    swap_cells(grid, x0, y0, x0, y0 - 1)
+                end
+            end
 
-            -- if cell below is empty, increase vertical speed
-            -- if cell_empty(grid, x0 + 1, y0) then
-            --     grid[x0][y0].x_speed = cell.x_speed + gravity
-            -- end
-
-            -- compute the potential target cell
-            -- local target_cell = {
-            --     math.floor(cell.x + cell.x_speed),
-            --     math.floor(cell.y + cell.y_speed),
-            -- }
+            -- either go one down
+            if cell_empty(grid, x0 + 1, y0) then
+                swap_cells(grid, x0, y0, x0 + 1, y0)
+                was_state_updated = true
+            -- or down diagonally
+            elseif cell_empty(grid, x0 + 1, y0 - 1)
+                or cell_empty(grid, x0 + 1, y0 + 1) then
+                local order = ({{1, -1}, {-1, 1}})[math.random(1, 2)]
+                for _, direction in ipairs(order) do
+                    if cell_empty(grid, x0 + 1, y0 + direction) then
+                        swap_cells(grid, x0, y0, x0 + 1, y0 + direction)
+                        break
+                    end
+                end
+                was_state_updated = true
+            -- or spread horizontally
+            elseif cell_empty(grid, x0, y0 - 1)
+                or cell_empty(grid, x0, y0 + 1) then
+                local order = ({{1, -1}, {-1, 1}})[math.random(1, 2)]
+                for _, direction in ipairs(order) do
+                    if cell_empty(grid, x0, y0 + direction) then
+                        swap_cells(grid, x0, y0, x0, y0 + direction)
+                        break
+                    end
+                end
+                was_state_updated = true
             --
-            -- local x, y = x0, y0
-            -- if target_cell[0] == x0 and target_cell[1] == y0 then
-            --     -- if cell doesnt change, update only precise coords
-            --     cell.x = cell.x + cell.x_speed
-            --     cell.y = cell.y + cell.y_speed
+            --
+            --
+            --
+            --
             -- else
-            --     -- update cell position along its current trajectory
-            --     for _, c in ipairs(common.shortest_path({x0, y0}, target_cell)) do
-            --         local next_x, next_y = c[1], c[2]
-            --         if not cell_empty(grid, next_x, next_y) then
-            --             -- cell hit some other cell, we need to reset some speed component
-            --             if next_x == x then
-            --                 grid[x][y].y_speed = 0
-            --             else
-            --                 grid[x][y].x_speed = 0
-            --             end
+            --     local max_disperse = 3
+            --     local dis_right, dis_left = 0, 0
+            --     -- check how far can we go to the right
+            --     for d = 1, max_disperse do
+            --         if not cell_empty(updated_grid, x0, y0 + d) then
             --             break
             --         end
-            --         swap_cells(grid, x, y, next_x, next_y)
-            --         state_updated = true
-            --         x, y = next_x, next_y
-            --         grid[x][y].x, grid[x][y].y = get_cell_center(x, y)
+            --         dis_right = d
             --     end
-            -- end
-            --
-            -- -- check if cell has hit some surface
-            -- if not cell_empty(grid, x + 1, y) then
-            --     local x_s, y_s = grid[x][y].x_speed, grid[x][y].y_speed
-            --     -- transfer vertical momoentum to horizontal
-            --     local max_h_speed = 2
-            --     local transfered_speed = math.max(x_s / 50, max_h_speed)
-            --     if y_s < 0 then
-            --         grid[x][y].y_speed = math.max(-max_h_speed, y_s - transfered_speed)
-            --     elseif y_s > 0 then
-            --         grid[x][y].y_speed = math.min(max_h_speed, y_s + transfered_speed)
-            --     else
-            --         grid[x][y].y_speed = ({-1, 1})[math.random(1,2)] * transfered_speed
+            --     -- updated_grid[x0][y0].char = tostring(dis_right)
+            --     -- -- check how far can we go to the left
+            --     -- for d = 1, max_disperse do
+            --     --     if not cell_empty(updated_grid, x0, y0 - d) then
+            --     --         break
+            --     --     end
+            --     --     dis_left = d
+            --     -- end
+            --     --
+            --     local found_empty_cell = false
+            --     for i = 1, dis_right do
+            --         if cell_empty(updated_grid, x0 + 1, y0 + i) then
+            --             swap_cells(updated_grid, x0, y0, x0 + 1, y0 + i)
+            --             was_state_updated = true
+            --             found_empty_cell = true
+            --             break
+            --         end
             --     end
-            -- end
-
-            -- 
-
-            -- check if 
-
-            -- if cell.is_free_falling then
-            -- elseif grid[i + 1][j]
-            -- end
             --
-            -- -- for k = 1, math.floor(v_speed) do
-            -- -- end
+            --     if found_empty_cell == false then
+            --         -- print('moving horizontally', x0, y0, dis_right)
+            --         swap_cells(updated_grid, x0, y0, x0, y0 + dis_right)
+            --         was_state_updated = true
+            --     end
             --
-            if grid[x0 + 1][y0].char == " " then
-                grid[x0 + 1][y0], grid[x0][y0] = grid[x0][y0], grid[x0 + 1][y0]
-                state_updated = true
-            elseif y0 > 1 and grid[x0 + 1][y0 - 1].char == " " then
-                grid[x0 + 1][y0 - 1], grid[x0][y0] = grid[x0][y0], grid[x0 + 1][y0 - 1]
-                state_updated = true
-            elseif y0 < #(grid[x0 + 1]) and grid[x0 + 1][y0 + 1].char == " " then
-                grid[x0 + 1][y0 + 1], grid[x0][y0] = grid[x0][y0], grid[x0 + 1][y0 + 1]
-                state_updated = true
+            --
+            --     -- if cell.disperse_direction == 1 then
+            --     --     if dis_right == 0 then
+            --     --         cell.disperse_direction = 1
+            --     --     else
+            --     --         swap_cells(updated_grid, x0, y0, x0, y0 + dis_right)
+            --     --         was_state_updated = true
+            --     --     end
+            --     -- elseif cell.disperse_direction == -1 then
+            --     --     if dis_left == 0 then
+            --     --         cell.disperse_direction = -1
+            --     --     else
+            --     --         swap_cells(updated_grid, x0, y0, x0, y0 - dis_left)
+            --     --         was_state_updated = true
+            --     --     end
+            --     -- -- elseif dis_left < dis_right then
+            --     -- --     swap_cells(grid, x0, y0, x0, y0 + dis_right)
+            --     -- --     cell.disperse_direction = 1
+            --     -- --     state_updated = true
+            --     -- -- elseif dis_left > dis_right then
+            --     -- --     swap_cells(grid, x0, y0, x0, y0 - dis_left)
+            --     -- --     state_updated = true
+            --     -- --     cell.disperse_direction = -1
+            --     -- else
+            --     --     local direction = ({1, -1})[math.random(1, 2)]
+            --     --     cell.disperse_direction = direction
+            --     --     local distance = direction * dis_left
+            --     --     swap_cells(updated_grid, x0, y0, x0, y0 + distance)
+            --     --     if distance > 0 then
+            --     --         was_state_updated = true
+            --     --     end
+            --     -- end
             end
             ::continue::
         end
     end
-    return state_updated
+    return was_state_updated
 end
 
 return M

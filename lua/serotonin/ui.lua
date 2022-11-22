@@ -2,6 +2,7 @@ local M = {}
 
 local window_id = nil
 local buffers = nil
+local namespace = vim.api.nvim_create_namespace("serotonin")
 
 -- Each frame is rendered in different buffer to avoid flickering
 -- caused by lack of higliths right after setting the buffer data. 
@@ -66,10 +67,11 @@ M.render_frame = function (grid)
         buffnr, 0, vim.api.nvim_win_get_height(window_id), false, lines
     )
     -- update highlights
+    vim.api.nvim_buf_clear_namespace(buffnr, namespace, 0, -1)
     for i, row in ipairs(grid) do
         for j, cell in ipairs(row) do
             vim.api.nvim_buf_add_highlight(
-                buffnr, -1, cell.hl_group, i - 1, j - 1, j
+                buffnr, namespace, cell.hl_group, i - 1, j - 1, j
             )
         end
     end
