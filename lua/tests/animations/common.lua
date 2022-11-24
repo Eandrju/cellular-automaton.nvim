@@ -1,6 +1,6 @@
-local common = {}
+local M = {}
 
-common.get_grid = function (pattern)
+M.get_grid = function (pattern)
     local grid = {}
     for _, line in ipairs(pattern) do
         local row = {}
@@ -28,16 +28,41 @@ local extract_only_chars_from_grid = function (grid)
     return only_chars_grid
 end
 
-common.assert_grid_equals = function (grid, pattern)
-    local received_grid = extract_only_chars_from_grid(grid)
-    local expected_grid = extract_only_chars_from_grid(common.get_grid(pattern))
-    assert.are.same(received_grid, expected_grid)
+local convert_grid_to_string = function (grid)
+    local result = ""
+    for _, row in ipairs(grid) do
+        for _, cell in ipairs(row) do
+            result = result .. cell.char
+        end
+        result = result .. "\n"
+    end
+    return string.sub(result, 1, -2)
 end
 
-common.assert_grid_different = function (grid, pattern)
-    local received_grid = extract_only_chars_from_grid(grid)
-    local expected_grid = extract_only_chars_from_grid(common.get_grid(pattern))
-    assert.are.not_.same(received_grid, expected_grid)
+local replace_spaces = function (str)
+    local result = ""
+    for i = 1, #str do
+        local char = string.sub(str, i, i)
+        if char == " " then
+            result = result .. "."
+        else
+            result = result .. char
+        end
+    end
+    return result
+end
+--
+
+M.assert_grid_same = function (grid, pattern, error_msg)
+    local got = "\n" .. convert_grid_to_string(grid) .. "\n"
+    local expected = "\n" .. table.concat(pattern, "\n") .. "\n"
+    assert.are.same( replace_spaces(got), replace_spaces(expected), error_msg)
 end
 
-return common
+M.assert_grid_different = function (grid, pattern, error_msg)
+    local got = "\n" .. convert_grid_to_string(grid) .. "\n"
+    local expected = "\n" .. table.concat(pattern, "\n") .. "\n"
+    assert.are.not_.same( replace_spaces(got), replace_spaces(expected), error_msg)
+end
+
+return M

@@ -1,69 +1,147 @@
 local m = require "serotonin.animations.make_it_rain"
 local c = require "tests.animations.common"
--- local c = require "serotonin.testharness.animations.common"
---
 
 local get_grid = function (pattern)
         local grid = c.get_grid(pattern)
         m.init(grid)
         m.side_noise = false
+        m.disperse_rate = 2
         return grid
 end
 
 describe("make_it_rain", function()
-    it("can be required", function()
-        require("serotonin")
-    end)
-
-    it("cell falls down if it can", function()
+    it("cell prefers falling down than going sideways", function()
         local grid = get_grid({
             " x ",
             "   ",
         })
         m.update(grid)
-        c.assert_grid_equals(grid, {
+        c.assert_grid_same(grid, {
             "   ",
             " x ",
         })
     end)
 
-    it("cell with right disperse direction falls right-down", function()
-        local grid = get_grid({
-            " x ",
-            " # ",
-        })
-        grid[1][2].disperse_direction = 1
-        m.update(grid)
-        c.assert_grid_equals(grid, {
-            "   ",
-            " #x",
-        })
+    it("cell with right disperse direction behaviour", function()
+        local cases = {
+            {
+                initial = {
+                    " x   ",
+                    " #   ",
+                },
+                expected = {
+                    "     ",
+                    " # x ",
+                }
+            },
+            {
+                initial = {
+                    " x   ",
+                    " # # ",
+                },
+                expected = {
+                    "     ",
+                    " #x# ",
+                }
+            },
+            {
+                initial = {
+                    " x   ",
+                    " ### ",
+                },
+                expected = {
+                    "   x ",
+                    " ### ",
+                }
+            },
+            {
+                initial = {
+                    " x # ",
+                    " ### ",
+                },
+                expected = {
+                    "  x# ",
+                    " ### ",
+                }
+            },
+            {
+                initial = {
+                    " x## ",
+                    " ### ",
+                },
+                expected = {
+                    " x## ",
+                    " ### ",
+                }
+            },
+        }
+        for _, case in ipairs(cases) do
+            local grid = get_grid(case.initial)
+            grid[1][2].disperse_direction = 1
+            m.update(grid)
+            c.assert_grid_same(grid, case.expected)
+        end
     end)
 
-    it("cell with right disperse direction falls right-right-down", function()
-        local grid = get_grid({
-            " x  ",
-            " ## "
-        })
-        grid[1][2].disperse_direction = 1
-        m.update(grid)
-        c.assert_grid_equals(grid, {
-            "    ",
-            " ##x",
-        })
-    end)
-
-    it("cell with right disperse direction moves right", function()
-        local grid = get_grid({
-            " x #",
-            " ###"
-        })
-        grid[1][2].disperse_direction = 1
-        m.update(grid)
-        c.assert_grid_equals(grid, {
-            "  x#",
-            " ###",
-        })
+    it("cell with left disperse direction behaviour", function()
+        local cases = {
+            {
+                initial = {
+                    "   x ",
+                    "   # ",
+                },
+                expected = {
+                    "     ",
+                    " x # ",
+                }
+            },
+            {
+                initial = {
+                    "   x ",
+                    " # # ",
+                },
+                expected = {
+                    "     ",
+                    " #x# ",
+                }
+            },
+            {
+                initial = {
+                    "   x ",
+                    " ### ",
+                },
+                expected = {
+                    " x   ",
+                    " ### ",
+                }
+            },
+            {
+                initial = {
+                    " # x ",
+                    " ### ",
+                },
+                expected = {
+                    " #x  ",
+                    " ### ",
+                }
+            },
+            {
+                initial = {
+                    " ##x ",
+                    " ### ",
+                },
+                expected = {
+                    " ##x ",
+                    " ### ",
+                }
+            },
+        }
+        for i, case in ipairs(cases) do
+            local grid = get_grid(case.initial)
+            grid[1][4].disperse_direction = -1
+            m.update(grid)
+            c.assert_grid_same(grid, case.expected, "Fked up case: " .. i)
+        end
     end)
 
     it("cell with nil disperse direction falls to randomly chosen side", function()
@@ -75,18 +153,6 @@ describe("make_it_rain", function()
         c.assert_grid_different(grid, {
             " x ",
             " # ",
-        })
-    end)
-
-    it("cell moves 3 cells to the right if none is available at lower level", function()
-        local grid = get_grid({
-            "##x     ",
-            "####### ",
-        })
-        m.update(grid)
-        c.assert_grid_equals(grid, {
-            "##   x  ",
-            "####### ",
         })
     end)
 end)

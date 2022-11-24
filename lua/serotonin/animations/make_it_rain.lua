@@ -1,18 +1,4 @@
-local M = {
-    fps = 20,
-    side_noise = false,
-}
-
 local frame
-
-M.init = function (grid)
-    for i = 1, #grid do
-        for j = 1, #(grid[i]) do
-            grid[i][j].disperse_direction = nil
-        end
-    end
-    frame = 1
-end
 
 local cell_empty = function (grid, x, y)
     if (
@@ -31,13 +17,24 @@ local swap_cells = function (grid, x1, y1, x2, y2)
     grid[x1][y1], grid[x2][y2] = grid[x2][y2], grid[x1][y1]
 end
 
+local M = {
+    fps = 80,
+    side_noise = true,
+    disperse_rate = 3,
+}
+
+
+M.init = function (grid)
+    frame = 1
+end
+
+
 M.update = function (grid)
     frame = frame + 1
-    -- reset processed flag
+    -- reset 'processed' flag
     for i = 1, #grid, 1 do
         for j = 1, #(grid[i]) do
             grid[i][j].processed = false
-            -- grid[i][j].disperse_direction = nil
         end
     end
     local was_state_updated = false
@@ -85,74 +82,29 @@ M.update = function (grid)
             if cell_empty(grid, x0 + 1, y0) then
                 swap_cells(grid, x0, y0, x0 + 1, y0)
                 was_state_updated = true
-                -- cell.disperse_direction = nil
             else
+            -- or to the side 
                 local disperse_direction = cell.disperse_direction or
                                            ({-1, 1})[math.random(1, 2)]
-                local disperse_distance = 3
-                local last_valid_pos = {x0, y0}
-                for d = 1, disperse_distance do
-                    local x = x0 + 1
+                local last_pos = {x0, y0}
+                for d = 1, M.disperse_rate do
                     local y = y0 + disperse_direction * d
-                    if cell_empty(grid, x, y) then
-                        last_valid_pos = {x, y}
-                        break
-                    end
-                    x = x0
-                    if not cell_empty(grid, x, y) then
+                    -- prevent teleportation
+                    if not cell_empty(grid, x0, y) then
                         cell.disperse_direction = disperse_direction * -1
                         break
+                    elseif last_pos[1] == x0 then
+                        swap_cells(grid, last_pos[1], last_pos[2], x0, y)
+                        was_state_updated = true
+                        last_pos = {x0, y}
                     end
-                    last_valid_pos = {x, y}
+                    if cell_empty(grid, x0 + 1, y) then
+                        swap_cells(grid, last_pos[1], last_pos[2], x0 + 1, y)
+                        was_state_updated = true
+                        last_pos = {x0 + 1, y}
+                    end
                 end
-                was_state_updated = true
-                swap_cells(grid, x0, y0, last_valid_pos[1], last_valid_pos[2])
             end
-            -- if cell.disperse_direction == -1 then
-            --     cell.char = "<"
-            -- elseif cell.disperse_direction == nil then
-            --     cell.char = 'n'
-            -- elseif cell.disperse_direction == 1 then
-            --     cell.char = ">"
-            -- elseif cell.disperse_direction == 0 then
-            --     cell.char = "0"
-            -- else
-            --     cell.char = cell.disperse_direction
-            -- end
-            -- or down diagonally
-            -- elseif cell_empty(grid, x0 + 1, y0 - 1)
-            --     or cell_empty(grid, x0 + 1, y0 + 1) then
-            --     local order = ({{1, -1}, {-1, 1}})[math.random(1, 2)]
-            --     for _, direction in ipairs(order) do
-            --         if cell_empty(grid, x0 + 1, y0 + direction) then
-            --             swap_cells(grid, x0, y0, x0 + 1, y0 + direction)
-            --             break
-            --         end
-            --     end
-            --     was_state_updated = true
-            -- -- or down diagonally but further
-            -- elseif cell_empty(grid, x0 + 1, y0 - 2)
-            --     or cell_empty(grid, x0 + 1, y0 + 2) then
-            --     local order = ({{2, -2}, {-2, 2}})[math.random(1, 2)]
-            --     for _, direction in ipairs(order) do
-            --         if cell_empty(grid, x0 + 1, y0 + direction) then
-            --             swap_cells(grid, x0, y0, x0 + 1, y0 + direction)
-            --             break
-            --         end
-            --     end
-            --     was_state_updated = true
-            -- -- or spread horizontally
-            -- elseif cell_empty(grid, x0, y0 - 1)
-            --     or cell_empty(grid, x0, y0 + 1) then
-            --     local order = ({{1, -1}, {-1, 1}})[math.random(1, 2)]
-            --     for _, direction in ipairs(order) do
-            --         if cell_empty(grid, x0, y0 + direction) then
-            --             swap_cells(grid, x0, y0, x0, y0 + direction)
-            --             break
-            --         end
-            --     end
-            --     was_state_updated = true
-            -- end
             ::continue::
         end
     end
