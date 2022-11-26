@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local m = require "serotonin.animations.make_it_rain"
 local c = require "tests.animations.common"
 
@@ -22,126 +23,150 @@ describe("make_it_rain", function()
         })
     end)
 
-    it("cell with right disperse direction behaviour", function()
-        local cases = {
-            {
-                initial = {
-                    " x   ",
-                    " #   ",
+    describe("cell with right disperse direction behaviour", function()
+        it("basic cases", function()
+            local cases = {
+                {
+                    initial = {
+                        " x   ",
+                        " #   ",
+                    },
+                    expected = {
+                        "     ",
+                        " # x ",
+                    }
                 },
-                expected = {
-                    "     ",
-                    " # x ",
-                }
-            },
-            {
-                initial = {
-                    " x   ",
-                    " # # ",
+                {
+                    initial = {
+                        " x   ",
+                        " # # ",
+                    },
+                    expected = {
+                        "     ",
+                        " #x# ",
+                    }
                 },
-                expected = {
-                    "     ",
-                    " #x# ",
-                }
-            },
-            {
-                initial = {
-                    " x   ",
-                    " ### ",
+                {
+                    initial = {
+                        " x   ",
+                        " ### ",
+                    },
+                    expected = {
+                        "   x ",
+                        " ### ",
+                    }
                 },
-                expected = {
-                    "   x ",
-                    " ### ",
-                }
-            },
-            {
-                initial = {
-                    " x # ",
-                    " ### ",
+                {
+                    initial = {
+                        " x # ",
+                        " ### ",
+                    },
+                    expected = {
+                        "  x# ",
+                        " ### ",
+                    }
                 },
-                expected = {
-                    "  x# ",
-                    " ### ",
-                }
-            },
-            {
-                initial = {
-                    " x## ",
-                    " ### ",
+                {
+                    initial = {
+                        " x## ",
+                        " ### ",
+                    },
+                    expected = {
+                        " x## ",
+                        " ### ",
+                    }
                 },
-                expected = {
-                    " x## ",
-                    " ### ",
-                }
-            },
-        }
-        for _, case in ipairs(cases) do
-            local grid = get_grid(case.initial)
-            grid[1][2].disperse_direction = 1
+            }
+            for _, case in ipairs(cases) do
+                local grid = get_grid(case.initial)
+                grid[1][2].disperse_direction = 1
+                m.update(grid)
+                c.assert_grid_same(grid, case.expected)
+            end
+        end)
+
+        it("switches disperse_direction to right if was blocked horizontally", function ()
+            local grid = get_grid({
+                "#x ",
+                "###",
+            })
+            grid[1][2].disperse_direction = -1
             m.update(grid)
-            c.assert_grid_same(grid, case.expected)
-        end
+            assert.are.equal(grid[1][2].disperse_direction, 1)
+        end)
     end)
 
-    it("cell with left disperse direction behaviour", function()
-        local cases = {
-            {
-                initial = {
-                    "   x ",
-                    "   # ",
+    describe("cell with left disperse direction behaviour", function()
+        it("basic cases", function()
+            local cases = {
+                {
+                    initial = {
+                        "   x ",
+                        "   # ",
+                    },
+                    expected = {
+                        "     ",
+                        " x # ",
+                    }
                 },
-                expected = {
-                    "     ",
-                    " x # ",
-                }
-            },
-            {
-                initial = {
-                    "   x ",
-                    " # # ",
+                {
+                    initial = {
+                        "   x ",
+                        " # # ",
+                    },
+                    expected = {
+                        "     ",
+                        " #x# ",
+                    }
                 },
-                expected = {
-                    "     ",
-                    " #x# ",
-                }
-            },
-            {
-                initial = {
-                    "   x ",
-                    " ### ",
+                {
+                    initial = {
+                        "   x ",
+                        " ### ",
+                    },
+                    expected = {
+                        " x   ",
+                        " ### ",
+                    }
                 },
-                expected = {
-                    " x   ",
-                    " ### ",
-                }
-            },
-            {
-                initial = {
-                    " # x ",
-                    " ### ",
+                {
+                    initial = {
+                        " # x ",
+                        " ### ",
+                    },
+                    expected = {
+                        " #x  ",
+                        " ### ",
+                    }
                 },
-                expected = {
-                    " #x  ",
-                    " ### ",
-                }
-            },
-            {
-                initial = {
-                    " ##x ",
-                    " ### ",
+                {
+                    initial = {
+                        " ##x ",
+                        " ### ",
+                    },
+                    expected = {
+                        " ##x ",
+                        " ### ",
+                    }
                 },
-                expected = {
-                    " ##x ",
-                    " ### ",
-                }
-            },
-        }
-        for i, case in ipairs(cases) do
-            local grid = get_grid(case.initial)
-            grid[1][4].disperse_direction = -1
+            }
+            for i, case in ipairs(cases) do
+                local grid = get_grid(case.initial)
+                grid[1][4].disperse_direction = -1
+                m.update(grid)
+                c.assert_grid_same(grid, case.expected, "Fked up case: " .. i)
+            end
+        end)
+
+        it("switches disperse_direction to right if was blocked horizontally", function ()
+            local grid = get_grid({
+                "#x ",
+                "###",
+            })
+            grid[1][2].disperse_direction = -1
             m.update(grid)
-            c.assert_grid_same(grid, case.expected, "Fked up case: " .. i)
-        end
+            assert.are.equal(grid[1][2].disperse_direction, 1)
+        end)
     end)
 
     it("cell with nil disperse direction falls to randomly chosen side", function()
