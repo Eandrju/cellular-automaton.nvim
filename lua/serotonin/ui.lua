@@ -71,7 +71,7 @@ M.render_frame = function (grid)
     for i, row in ipairs(grid) do
         for j, cell in ipairs(row) do
             vim.api.nvim_buf_add_highlight(
-                buffnr, namespace, cell.hl_group, i - 1, j - 1, j
+                buffnr, namespace, cell.hl_group or "", i - 1, j - 1, j
             )
         end
     end
