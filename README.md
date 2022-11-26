@@ -1,5 +1,5 @@
 # cellular-automaton.nvim
-A useless plugin that might help you cope with stubbornly broken tests or overall lack of sense in life. It let's you execute aesthetically pleasing, cellular automaton animations based on the content of neovim buffer.
+A useless plugin that might help you cope with stubbornly broken tests or overall lack of sense in life. It lets you execute aesthetically pleasing, cellular automaton animations based on the content of neovim buffer.
 
 https://user-images.githubusercontent.com/37074839/204104990-6ebd7767-92e9-43b9-878a-3493a08a3308.mov
 
