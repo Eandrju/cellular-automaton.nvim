@@ -2,7 +2,7 @@ local M = {}
 
 local window_id = nil
 local buffers = nil
-local namespace = vim.api.nvim_create_namespace("serotonin")
+local namespace = vim.api.nvim_create_namespace("cellular-automaton")
 
 -- Each frame is rendered in different buffer to avoid flickering
 -- caused by lack of higliths right after setting the buffer data. 
@@ -35,13 +35,15 @@ M.open_window = function (host_window)
     local exit_keys = {"q", "Q", "<ESC>", "<CR>"}
     for _, key in ipairs(exit_keys) do
         for _, buffer_id in ipairs(buffers) do
-            vim.api.nvim_buf_set_keymap(
-                buffer_id,
-                "n",
-                key,
-                "<Cmd>lua require('serotonin.ui').clean()<CR>",
-                { silent = true }
-            )
+            for _, mode in ipairs({'n', 'i'}) do
+                vim.api.nvim_buf_set_keymap(
+                    buffer_id,
+                    mode,
+                    key,
+                    "<Cmd>lua require('cellular-automaton.ui').clean()<CR>",
+                    { silent = true }
+                )
+            end
         end
     end
     return window_id

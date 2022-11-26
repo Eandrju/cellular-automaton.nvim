@@ -1,8 +1,8 @@
 local M = {}
 
 local animations = {
-    make_it_rain = require("serotonin.animations.make_it_rain"),
-    game_of_life = require("serotonin.animations.game_of_life")
+    make_it_rain = require("cellular-automaton.animations.make_it_rain"),
+    game_of_life = require("cellular-automaton.animations.game_of_life")
 }
 
 local apply_default_options = function (config)
@@ -39,7 +39,7 @@ M.start_animation = function(animation_name)
     if animations[animation_name] == nil then
         error("Unknown animation " .. animation_name)
     end
-    require("serotonin.manager").execute_animation(animations[animation_name])
+    require("cellular-automaton.manager").execute_animation(animations[animation_name])
 end
 
 return M

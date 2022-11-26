@@ -1,7 +1,7 @@
 local M = {}
 
-local ui = require("serotonin.ui")
-local common = require("serotonin.common")
+local ui = require("cellular-automaton.ui")
+local common = require("cellular-automaton.common")
 
 local function process_frame(grid, animation_config, win_id)
     -- quit if animation already interrupted
@@ -30,7 +30,7 @@ end
 M.execute_animation = function(animation_config)
     local host_win_id = vim.api.nvim_get_current_win()
     local host_bufnr = vim.api.nvim_get_current_buf()
-    local grid = require("serotonin.load").load_base_grid(host_win_id, host_bufnr)
+    local grid = require("cellular-automaton.load").load_base_grid(host_win_id, host_bufnr)
     if animation_config.init ~= nil then
         animation_config.init(grid)
     end
