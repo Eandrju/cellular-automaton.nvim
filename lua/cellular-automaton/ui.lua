@@ -29,24 +29,8 @@ M.open_window = function (host_window)
         row = 0,
         col = 0,
     })
-    -- vim.api.nvim_win_set_option(window_id, "winhl", "Normal:SerotoninNormal")
-    vim.api.nvim_win_set_option(window_id, "winhl", "Normal:TelescopeNormal")
-
-    local exit_keys = {"q", "Q", "<ESC>", "<CR>"}
-    for _, key in ipairs(exit_keys) do
-        for _, buffer_id in ipairs(buffers) do
-            for _, mode in ipairs({'n', 'i'}) do
-                vim.api.nvim_buf_set_keymap(
-                    buffer_id,
-                    mode,
-                    key,
-                    "<Cmd>lua require('cellular-automaton.ui').clean()<CR>",
-                    { silent = true }
-                )
-            end
-        end
-    end
-    return window_id
+    vim.api.nvim_win_set_option(window_id, "winhl", "Normal:CellularAutomatonNormal")
+    return window_id, buffers
 end
 
 

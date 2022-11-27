@@ -8,14 +8,9 @@ if vim.g.loaded_cellular_automaton == 1 then
 end
 vim.g.loaded_cellular_automaton = 1
 
--- TODO remove loop
-local highlights = {
-  SerotoninNormal = { default = true, link = "Normal" },
-}
-
-for k, v in pairs(highlights) do
-  vim.api.nvim_set_hl(0, k, v)
-end
+vim.api.nvim_set_hl(
+    0, 'CellularAutomatonNormal', { default = true, link = "Normal" }
+)
 
 vim.api.nvim_create_user_command("CellularAutomaton", function(opts)
   require("cellular-automaton").start_animation(opts.fargs[1])
