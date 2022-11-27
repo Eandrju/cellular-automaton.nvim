@@ -12,6 +12,10 @@ From the [Wiki](https://en.wikipedia.org/wiki/Cellular_automaton):
 > its current state, and the states of the neighbouring cells.
 
 ## But.. why?
+There is no pragmatic use case whatsoever. However, there are some pseudo-scientifically proven "use-cases":
+- Urgent deadline approaches? Don't worry. With this plugin you can procrastinate even more!
+- Are you stuck and don't know how to make any progress? You can use this plugin as a visual stimulant for epic ideas!
+- Those nasty colleagues keep peeking over your shoulder and stealing your code? Now you can obfuscate your editor! Good luck stealing that. 
 
 
 ## Requirements
