@@ -23,8 +23,8 @@ M.register_animation = function (config)
     -- "module" should implement update_grid(grid) method which takes 2D "grid"
     -- table of cells and update it inplace. Each "cell" is a table with following
     -- fields {"hl_group", "char"}
-    if config.update_grid == nil then
-        error("Animation module must implement update_grid function")
+    if config.update == nil then
+        error("Animation module must implement update function")
         return
     end
     if config.name == nil then
@@ -32,7 +32,7 @@ M.register_animation = function (config)
         return
     end
 
-    M.animations[module.name] = apply_default_options(config)
+    M.animations[config.name] = apply_default_options(config)
 end
 
 M.start_animation = function(animation_name)
