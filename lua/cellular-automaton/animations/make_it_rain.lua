@@ -18,7 +18,7 @@ local swap_cells = function (grid, x1, y1, x2, y2)
 end
 
 local M = {
-    fps = 80,
+    fps = 50,
     side_noise = true,
     disperse_rate = 3,
 }

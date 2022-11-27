@@ -1,8 +1,8 @@
 local M = {}
 
-local animations = {
+M.animations = {
     make_it_rain = require("cellular-automaton.animations.make_it_rain"),
-    game_of_life = require("cellular-automaton.animations.game_of_life")
+    game_of_life = require("cellular-automaton.animations.game_of_life"),
 }
 
 local apply_default_options = function (config)
@@ -32,14 +32,16 @@ M.register_animation = function (config)
         return
     end
 
-    animations[module.name] = apply_default_options(config)
+    M.animations[module.name] = apply_default_options(config)
 end
 
 M.start_animation = function(animation_name)
-    if animations[animation_name] == nil then
-        error("Unknown animation " .. animation_name)
+    if M.animations[animation_name] == nil then
+        error("Unknown cellular-automaton animation " .. animation_name)
     end
-    require("cellular-automaton.manager").execute_animation(animations[animation_name])
+    require("cellular-automaton.manager").execute_animation(
+        M.animations[animation_name]
+    )
 end
 
 return M

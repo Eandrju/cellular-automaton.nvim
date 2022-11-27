@@ -3,10 +3,10 @@ if 1 ~= vim.fn.has "nvim-0.8.0" then
   return
 end
 
-if vim.g.loaded_serotonin == 1 then
+if vim.g.loaded_cellular_automaton == 1 then
   return
 end
-vim.g.loaded_serotonin = 1
+vim.g.loaded_cellular_automaton = 1
 
 -- TODO remove loop
 local highlights = {
@@ -18,6 +18,17 @@ for k, v in pairs(highlights) do
 end
 
 vim.api.nvim_create_user_command("CellularAutomaton", function(opts)
-  local sim_fn = require("cellular-automaton.animations.make_it_rain").update_state
-  require("cellular-automaton").start_animation(sim_fn)
-end, {})
+  require("cellular-automaton").start_animation(opts.fargs[1])
+end, {
+  nargs = 1,
+  complete = function(_, line)
+    local animation_list = vim.tbl_keys(require("cellular-automaton").animations)
+    local l = vim.split(line, "%s+", {})
+
+    if #l == 2 then
+      return vim.tbl_filter(function(val)
+        return vim.startswith(val, l[2])
+      end, animation_list)
+    end
+  end,
+})
