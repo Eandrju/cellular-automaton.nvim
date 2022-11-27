@@ -53,6 +53,7 @@ Using simple interface you can implement your own cellular automaton animation. 
 - `char` - single string character
 - `hl_group` - treesitter's highlight group
 
+Example sliding animation:
 ```lua
 local config = {
     fps = 50,
@@ -77,7 +78,7 @@ end
 
 require("cellular-automaton").register_animation(config)
 ```
-Result of above animation:
+Result:
 
 https://user-images.githubusercontent.com/37074839/204161376-3b10aadd-90e1-4059-b701-ce318085622c.mov
 
