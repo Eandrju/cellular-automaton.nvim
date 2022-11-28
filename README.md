@@ -40,6 +40,7 @@ Or just create a mapping:
 ```lua
 vim.keymap.set("n", "<leader>fml", "<cmd>CellularAutomaton make_it_rain<CR>")
 ```
+You can close animation window with one of: `q`/`<Esc>`/`<CR>`
 
 ## Supported animations
 ### Make it Rain
