@@ -28,7 +28,7 @@ use 'eandrju/cellular-automaton.nvim'
 ```
 
 ## Usage
-You can trigger it, using simple command:
+You can trigger it using simple command:
 ```
 :CellularAutomaton make_it_rain
 ```
@@ -36,9 +36,12 @@ or
 ```
 :CellularAutomaton game_of_life
 ```
-Create simple mapping:
+Or just create a mapping:
+```lua
+vim.keymap.set("n", "<leader>fml", "<cmd>CellularAutomaton make_it_rain<CR>")
+```
 
-## Suppported animations
+## Supported animations
 ### Make it Rain
 
 https://user-images.githubusercontent.com/37074839/204104990-6ebd7767-92e9-43b9-878a-3493a08a3308.mov
@@ -49,7 +52,7 @@ https://user-images.githubusercontent.com/37074839/204162517-35b429ad-4cef-45b1-
 
 
 ## Implementing your own cellular automaton logic
-Using simple interface you can implement your own cellular automaton animation. You need to provide configuration table with `update` function, which takes a 2D grid of cells and modifies it in place. Each cell by default consist of two fields: 
+Using a simple interface you can implement your own cellular automaton animation. You need to provide a configuration table with an `update` function, which takes a 2D grid of cells and modifies it in place. Each cell by default consist of two fields: 
 - `char` - single string character
 - `hl_group` - treesitter's highlight group
 
@@ -82,9 +85,9 @@ Result:
 
 https://user-images.githubusercontent.com/37074839/204161376-3b10aadd-90e1-4059-b701-ce318085622c.mov
 
-
-
-
+## Inspiration and references
+- https://www.youtube.com/watch?v=5Ka3tbbT-9E
+- https://www.youtube.com/watch?v=prXuyMCgbTc
 
 
 
