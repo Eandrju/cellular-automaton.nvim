@@ -1,3 +1,10 @@
+local M = {
+    fps = 10,
+    overpopultion_thr = 4,
+    underpopulation_thr = 1,
+    respawn_condition = 3,
+}
+
 local function is_cell_alive (grid, x, y)
     if (
         x > 0 and
@@ -38,13 +45,6 @@ local function respawn_cell(grid, prev_grid, x, y)
     local neighbours = get_neighbours(prev_grid, x, y)
     grid[x][y] = vim.deepcopy(neighbours[math.random(1, #neighbours)])
 end
-
-local M = {
-    fps = 10,
-    overpopultion_thr = 4,
-    underpopulation_thr = 1,
-    respawn_condition = 3,
-}
 
 
 M.init = function (grid)

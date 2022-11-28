@@ -1,5 +1,5 @@
 local assert = require("luassert")
-local m = require "serotonin.animations.make_it_rain"
+local m = require "cellular-automaton.animations.make_it_rain"
 local c = require "tests.animations.common"
 
 local get_grid = function (pattern)

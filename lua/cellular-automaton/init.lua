@@ -21,7 +21,7 @@ end
 
 M.register_animation = function (config)
     -- "module" should implement update_grid(grid) method which takes 2D "grid"
-    -- table of cells and update it inplace. Each "cell" is a table with following
+    -- table of cells and updates it in place. Each "cell" is a table with following
     -- fields {"hl_group", "char"}
     if config.update == nil then
         error("Animation module must implement update function")

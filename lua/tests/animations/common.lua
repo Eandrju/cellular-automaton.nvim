@@ -17,17 +17,6 @@ M.get_grid = function (pattern)
     return grid
 end
 
-local extract_only_chars_from_grid = function (grid)
-    local only_chars_grid = {}
-    for i, row in ipairs(grid) do
-        table.insert(only_chars_grid, {})
-        for j, cell in ipairs(row) do
-            only_chars_grid[i][j] = {char = cell.char}
-        end
-    end
-    return only_chars_grid
-end
-
 local convert_grid_to_string = function (grid)
     local result = ""
     for _, row in ipairs(grid) do
