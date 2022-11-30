@@ -57,6 +57,11 @@ M.execute_animation = function(animation_config)
             end
         end
     end
+    vim.api.nvim_create_autocmd("WinClosed", {
+        group = vim.api.nvim_create_augroup("CellularAutomoton", {clear = true}),
+        pattern = tostring(win_id),
+        callback = M.clean
+    })
 end
 
 M.clean = function ()
