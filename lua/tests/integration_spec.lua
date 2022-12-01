@@ -9,10 +9,20 @@ local function setup_viewport(lines, win_options)
 end
 
 describe("integration", function()
+  before_each(function()
+    require("cellular-automaton.manager").clean()
+  end)
+
   it("quiting with :q doesnt break next animations", function()
     setup_viewport({ "aaaaa", "     " }, {})
     vim.cmd("CellularAutomaton make_it_rain")
     vim.cmd("q")
     vim.cmd("CellularAutomaton make_it_rain")
+  end)
+
+  it("'list' window option is turned off to prevent marking trailing spaces", function()
+    vim.cmd("set list")
+    vim.cmd("CellularAutomaton make_it_rain")
+    assert.is_false(vim.api.nvim_win_get_option(0, "list"))
   end)
 end)

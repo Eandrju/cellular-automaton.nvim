@@ -30,6 +30,7 @@ M.open_window = function(host_window)
     col = 0,
   })
   vim.api.nvim_win_set_option(window_id, "winhl", "Normal:CellularAutomatonNormal")
+  vim.api.nvim_win_set_option(window_id, "list", false)
   return window_id, buffers
 end
 
@@ -61,6 +62,7 @@ M.render_frame = function(grid)
 end
 
 M.clean = function()
+  buffers = buffers or {}
   for _, buffnr in ipairs(buffers) do
     if vim.api.nvim_buf_is_valid(buffnr) then
       vim.api.nvim_buf_delete(buffnr, { force = true })
