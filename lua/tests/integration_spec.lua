@@ -1,3 +1,5 @@
+local mock = require("luassert.mock")
+
 local function setup_viewport(lines, win_options)
   local options = win_options or {}
   local buffnr = vim.api.nvim_create_buf(false, true)
@@ -13,9 +15,23 @@ describe("integration", function()
     require("cellular-automaton.manager").clean()
   end)
 
-  it("quiting with :q doesnt break next animations", function()
+  it("unhandled error doesn't break next animations", function()
+    local test_animation = {
+      name = "test",
+      update = function()
+        error("test error")
+      end,
+    }
+    require("cellular-automaton").register_animation(test_animation)
     setup_viewport({ "aaaaa", "     " }, {})
+    local ok, err = pcall(vim.cmd, "CellularAutomaton test")
+    assert.is_false(ok)
     vim.cmd("CellularAutomaton make_it_rain")
+  end)
+
+  it("quiting with :q doesnt break next animations", function()
+    vim.cmd("CellularAutomaton make_it_rain")
+    setup_viewport({ "aaaaa", "     " }, {})
     vim.cmd("q")
     vim.cmd("CellularAutomaton make_it_rain")
   end)
