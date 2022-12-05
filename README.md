@@ -42,6 +42,9 @@ vim.keymap.set("n", "<leader>fml", "<cmd>CellularAutomaton make_it_rain<CR>")
 ```
 You can close animation window with one of: `q`/`<Esc>`/`<CR>`
 
+## Known issues
+- folding and wrapping is not supported ATM
+
 ## Supported animations
 ### Make it Rain
 
