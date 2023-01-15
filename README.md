@@ -64,7 +64,7 @@ Example sliding animation:
 ```lua
 local config = {
     fps = 50,
-    name = 'snake',
+    name = 'slide',
 }
 
 -- init function is invoked only once at the start
