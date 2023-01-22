@@ -30,9 +30,7 @@ local get_usable_window_width = function()
           let signwidth *= 2  " each signcolumn is 2-char wide
         elseif &signcolumn == 'auto'
           let supports_sign_groups = has('nvim-0.4.2') || has('patch-8.1.614')
-          let signlist = execute(
-            printf('sign place ' . (supports_sign_groups ? 'group=* ' : '') . 'buffer=%d', bufnr(''))
-          )
+          let signlist = execute(printf('sign place ' . (supports_sign_groups ? 'group=* ' : '') . 'buffer=%d', bufnr('')))
           let signlist = split(signlist, "\n")
           let signwidth = len(signlist) > 2 ? 2 : 0
         elseif &signcolumn =~ 'auto'
