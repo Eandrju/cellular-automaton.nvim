@@ -77,6 +77,7 @@ M.load_base_grid = function(window, buffer)
     end
   end
   local data = vim.api.nvim_buf_get_lines(buffer, vertical_range.start, vertical_range.end_, true)
+
   -- update with buffer data
   for i, line in ipairs(data) do
     for j = 1, window_width do
