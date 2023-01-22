@@ -63,15 +63,13 @@ local function _execute_animation(animation_config)
   setup_cleaning(win_id, buffers)
 end
 
-
 M.execute_animation = function(animation_config)
-    local ok, err = pcall(_execute_animation, animation_config)
-    if not ok then
-        M.clean()
-        error(err)
-    end
+  local ok, err = pcall(_execute_animation, animation_config)
+  if not ok then
+    M.clean()
+    error(err)
+  end
 end
-
 
 M.clean = function()
   animation_in_progress = false

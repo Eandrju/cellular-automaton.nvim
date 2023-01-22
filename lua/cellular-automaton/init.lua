@@ -37,9 +37,16 @@ M.register_animation = function(config)
 end
 
 M.start_animation = function(animation_name)
+  -- Make sure animaiton exists
   if M.animations[animation_name] == nil then
-    error("Unknown cellular-automaton animation " .. animation_name)
+    error("Error while starting an animation. Unknown cellular-automaton animation: " .. animation_name)
   end
+
+  -- Make sure nvim treesitter parser exists for current buffer
+  if not require("nvim-treesitter.parsers").has_parser() then
+    error("Error while starting an animation. Current buffer doesn't have associated nvim-treesitter parser.")
+  end
+
   manager.execute_animation(M.animations[animation_name])
 end
 
