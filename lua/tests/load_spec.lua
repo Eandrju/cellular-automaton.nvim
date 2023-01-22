@@ -16,6 +16,8 @@ local function setup_viewport(win_height, win_width, lines, ver_scroll, hor_scro
   if ver_scroll > 0 then
     vim.cmd(string.format([[exec "normal! %s\<C-e>"]], ver_scroll))
   end
+  -- set nowrap - otherwise horizontall scrolling doesnt work
+  vim.opt.wrap = false
   if hor_scroll > 0 then
     vim.cmd(string.format([[exec "normal! %szl"]], hor_scroll))
   end
