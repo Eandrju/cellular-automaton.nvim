@@ -12,5 +12,4 @@ read_globals = {
 ignore = {
   "212", -- Unused argument 
   "122", -- Indirectly setting a readonly global
-  "631", -- temporarly only
 }
