@@ -20,6 +20,14 @@ local apply_default_options = function(config)
   return default
 end
 
+local get_random_animation = function()
+  local keyset = {}
+  for k in pairs(M.animations) do
+    table.insert(keyset, k)
+  end
+  return M.animations[keyset[math.random(#keyset)]]
+end
+
 M.register_animation = function(config)
   -- "module" should implement update_grid(grid) method which takes 2D "grid"
   -- table of cells and updates it in place. Each "cell" is a table with following
@@ -37,17 +45,17 @@ M.register_animation = function(config)
 end
 
 M.start_animation = function(animation_name)
+  local animation = animation_name and M.animations[animation_name] or get_random_animation()
   -- Make sure animaiton exists
-  if M.animations[animation_name] == nil then
+  if animation == nil then
     error("Error while starting an animation. Unknown cellular-automaton animation: " .. animation_name)
   end
-
   -- Make sure nvim treesitter parser exists for current buffer
   if not require("nvim-treesitter.parsers").has_parser() then
     error("Error while starting an animation. Current buffer doesn't have associated nvim-treesitter parser.")
   end
 
-  manager.execute_animation(M.animations[animation_name])
+  manager.execute_animation(animation)
 end
 
 return M
