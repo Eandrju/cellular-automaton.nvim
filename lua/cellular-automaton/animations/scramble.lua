@@ -3,6 +3,10 @@ local M = {
   name = "scramble",
 }
 
+local function is_alphanumeric(c)
+  return c >= "a" and c <= "z" or c >= "A" and c <= "Z" or c >= "0" and c <= "9"
+end
+
 local scramble_word = function(word)
   local chars = {}
   while #word ~= 0 do
@@ -19,7 +23,7 @@ M.update = function(grid)
     local word = {}
     for j = 1, #grid[i] do
       local c = grid[i][j]
-      if c.char == " " then
+      if not is_alphanumeric(c.char) then
         if #word ~= 0 then
           for _, d in pairs(scramble_word(word)) do
             table.insert(scrambled, d)
