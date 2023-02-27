@@ -5,6 +5,7 @@ local manager = require("cellular-automaton.manager")
 M.animations = {
   make_it_rain = require("cellular-automaton.animations.make_it_rain"),
   game_of_life = require("cellular-automaton.animations.game_of_life"),
+  scramble = require("cellular-automaton.animations.scramble"),
 }
 
 local apply_default_options = function(config)
