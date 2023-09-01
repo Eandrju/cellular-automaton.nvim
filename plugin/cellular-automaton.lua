@@ -19,7 +19,7 @@ vim.api.nvim_set_hl(0, "CellularAutomatonNormal", { default = true, link = "Norm
 vim.api.nvim_create_user_command("CellularAutomaton", function(opts)
   require("cellular-automaton").start_animation(opts.fargs[1])
 end, {
-  nargs = 1,
+  nargs = "?",
   complete = function(_, line)
     local animation_list = vim.tbl_keys(require("cellular-automaton").animations)
     local l = vim.split(line, "%s+", {})

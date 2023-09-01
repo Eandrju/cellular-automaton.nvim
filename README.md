@@ -28,7 +28,11 @@ use 'eandrju/cellular-automaton.nvim'
 ```
 
 ## Usage
-You can trigger it using simple command:
+You can trigger it using simple command to run a random registered animation:
+``` 
+:CellularAutomaton
+```
+or specifying the animation name like:
 ```
 :CellularAutomaton make_it_rain
 ```
