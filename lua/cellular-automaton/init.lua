@@ -44,8 +44,10 @@ M.start_animation = function(animation_name)
   end
 
   -- Make sure nvim treesitter parser exists for current buffer
-  if not require("nvim-treesitter.parsers").has_parser() then
-    error("Error while starting an animation. Current buffer doesn't have associated nvim-treesitter parser.")
+  local ft = vim.bo[0].filetype
+  local lang = vim.treesitter.language.get_lang(ft)
+  if not lang then
+    error("Error while starting an animation. Current buffer doesn't have associated tree-sitter parser.")
   end
 
   manager.execute_animation(M.animations[animation_name])
