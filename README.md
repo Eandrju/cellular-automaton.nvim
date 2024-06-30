@@ -19,8 +19,8 @@ There is no pragmatic use case whatsoever. However, there are some pseudo-scient
 - Working with legacy code? Just create a `<leader>fml` mapping and see it melt.
 
 ## Requirements
-- neovim >= 0.8
-- nvim-treesitter plugin
+- neovim >= 0.9
+- treesitter parser for current buffer
 
 ## Installation
 ```

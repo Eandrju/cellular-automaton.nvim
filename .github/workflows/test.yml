@@ -10,17 +10,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
-            rev: nightly/nvim-linux64.tar.gz
-            manager: sudo apt-get
-          - os: ubuntu-22.04
-            rev: v0.8.1/nvim-linux64.tar.gz
-            manager: sudo apt-get
           - os: macos-12
             rev: nightly/nvim-macos.tar.gz
             manager: brew
           - os: macos-12
-            rev: v0.8.1/nvim-macos.tar.gz
+            rev: v0.9.1/nvim-macos.tar.gz
             manager: brew
     steps:
       - uses: actions/checkout@v3
