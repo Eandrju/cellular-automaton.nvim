@@ -59,6 +59,13 @@ local get_usable_window_width = function()
 end
 
 M.load_base_grid = function(window, buffer)
+  if vim.bo[buffer].fileencoding ~= "utf-8" then
+    -- NOTE(libro): Is it necessary? Previously this plugin didn't handle
+    --   multibyte-chars properly - so if buffer is not UTF8-encoded then
+    --   the animation will be rusty as it was for UTF-8 buffers earlier
+    error("Only UTF-8 buffers are supported")
+  end
+
   local window_width = get_usable_window_width()
   local vertical_range = {
     start = vim.fn.line("w0") - 1,
