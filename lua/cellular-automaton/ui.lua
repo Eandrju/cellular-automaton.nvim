@@ -48,7 +48,7 @@ M.render_frame = function(grid)
     local width = #row
     local cells_displayed = 0
     for _, cell in ipairs(row) do
-      cells_displayed = cells_displayed + vim.fn.strdisplaywidth(cell.char)
+      cells_displayed = cells_displayed + vim.fn.strdisplaywidth(cell.char, cells_displayed)
       if cells_displayed > width then
         break
       end
