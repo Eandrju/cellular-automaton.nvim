@@ -55,7 +55,7 @@ local get_usable_window_width = function()
     ]],
     true
   )
-  return window_width
+  return tonumber(window_width)
 end
 
 M.load_base_grid = function(window, buffer)
@@ -81,12 +81,22 @@ M.load_base_grid = function(window, buffer)
 
   -- update with buffer data
   for i, line in ipairs(data) do
-    for j = 1, window_width do
-      local idx = horizontal_range.start + j
-      if idx <= string.len(line) then
-        grid[i][j].char = string.sub(line, idx, idx)
-        grid[i][j].hl_group = get_dominant_hl_group(buffer, vertical_range.start + i, idx)
+    local j = 0
+    local chars_displayed = 0
+    -- NOTE(libro): Since we need to iterate over (possibly)
+    --   multibyte symbols we need to know first column's byte index
+    local byte_pos = vim.fn.getpos(vertical_range.start + i - 1)[3]
+    for utf8_char in line:sub(byte_pos, -1):gmatch("[\x01-\x7F\xC2-\xF4%z][\x80-\xBF]*") do
+      chars_displayed = chars_displayed + vim.fn.strdisplaywidth(utf8_char)
+      if chars_displayed > window_width then
+        break
       end
+
+      j = j + 1
+      byte_pos = byte_pos + #utf8_char
+
+      grid[i][j].char = utf8_char
+      grid[i][j].hl_group = get_dominant_hl_group(buffer, vertical_range.start + i, horizontal_range.start + j)
     end
   end
   return grid
