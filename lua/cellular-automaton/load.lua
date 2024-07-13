@@ -94,16 +94,25 @@ M.load_base_grid = function(window, buffer)
     --   multibyte symbols we need to know first column's byte index
     local byte_pos = vim.fn.getpos(vertical_range.start + i - 1)[3]
     for utf8_char in line:sub(byte_pos, -1):gmatch("[\x01-\x7F\xC2-\xF4%z][\x80-\xBF]*") do
-      chars_displayed = chars_displayed + vim.fn.strdisplaywidth(utf8_char)
+      local char_display_width = vim.fn.strdisplaywidth(utf8_char, chars_displayed)
+      chars_displayed = chars_displayed + char_display_width
       if chars_displayed > window_width then
         break
       end
 
-      j = j + 1
-      byte_pos = byte_pos + #utf8_char
-
-      grid[i][j].char = utf8_char
-      grid[i][j].hl_group = get_dominant_hl_group(buffer, vertical_range.start + i, horizontal_range.start + j)
+      if #utf8_char == 1 and utf8_char:byte(1, 1) == 0x09 then
+        for _ = 1, char_display_width do
+          j = j + 1
+          byte_pos = byte_pos + 1
+          grid[i][j].char = " "
+          grid[i][j].hl_group = ""
+        end
+      else
+        j = j + 1
+        byte_pos = byte_pos + #utf8_char
+        grid[i][j].char = utf8_char
+        grid[i][j].hl_group = get_dominant_hl_group(buffer, vertical_range.start + i, horizontal_range.start + j)
+      end
     end
   end
   return grid
