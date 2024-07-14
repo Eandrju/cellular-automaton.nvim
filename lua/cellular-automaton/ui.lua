@@ -31,15 +31,7 @@ M.open_window = function(host_window)
   })
 
   vim.wo[window_id].winhl = "Normal:CellularAutomatonNormal"
-  vim.wo[window_id].list = true
-
-  for _, bufnr in ipairs(buffers) do
-    -- NOTE(libro): According to *:help vim.wo* only bufnr=0
-    --   is supported for local window options
-    vim.api.nvim_win_set_buf(window_id, bufnr)
-    vim.wo[window_id][0].listchars = "tab:<->"
-  end
-
+  vim.wo[window_id].list = false
   return window_id, buffers
 end
 
