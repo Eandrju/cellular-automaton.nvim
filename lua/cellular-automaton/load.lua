@@ -127,6 +127,9 @@ M.load_base_grid = function(window, buffer)
         end
       else
         jj = jj + 1
+        if jj > window_width then
+          goto to_next_line
+        end
         grid[i][jj].char = char
         grid[i][jj].hl_group = get_dominant_hl_group(buffer, vertical_range.start + i, virtcol)
       end
