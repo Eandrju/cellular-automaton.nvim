@@ -46,13 +46,7 @@ M.render_frame = function(grid)
   local lines = {}
   for _, row in ipairs(grid) do
     local chars = {}
-    local width = #row
-    local cells_displayed = 0
     for _, cell in ipairs(row) do
-      cells_displayed = cells_displayed + vim.fn.strdisplaywidth(cell.char, cells_displayed)
-      if cells_displayed > width then
-        break
-      end
       table.insert(chars, cell.char)
     end
     table.insert(lines, table.concat(chars, ""))
@@ -60,22 +54,9 @@ M.render_frame = function(grid)
   vim.api.nvim_buf_set_lines(buffnr, 0, vim.api.nvim_win_get_height(window_id), false, lines)
   -- update highlights
   vim.api.nvim_buf_clear_namespace(buffnr, namespace, 0, -1)
-
   for i, row in ipairs(grid) do
-    local extra_width = 0
     for j, cell in ipairs(row) do
-      local utf8_char_len = string.len(cell.char)
-      vim.api.nvim_buf_add_highlight(
-        buffnr,
-        namespace,
-        cell.hl_group or "",
-        i - 1,
-        j - 1 + extra_width,
-        j - 1 + utf8_char_len + extra_width
-      )
-      if utf8_char_len > 1 then
-        extra_width = extra_width + utf8_char_len - 1
-      end
+      vim.api.nvim_buf_add_highlight(buffnr, namespace, cell.hl_group or "", i - 1, j - 1, j)
     end
   end
   -- swap buffers

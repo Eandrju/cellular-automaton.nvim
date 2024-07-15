@@ -1,3 +1,5 @@
+local unpack = unpack or table.unpack
+
 local M = {}
 
 local get_dominant_hl_group = function(buffer, i, j)
@@ -64,12 +66,11 @@ M.load_base_grid = function(window, buffer)
     start = vim.fn.line("w0") - 1,
     end_ = vim.fn.line("w$"),
   }
-  local horizontal_range = {
-    start = vim.fn.winsaveview().leftcol,
-    end_ = vim.fn.winsaveview().leftcol + window_width,
-  }
+  local first_visible_virtcol = vim.fn.winsaveview().leftcol + 1
+  local last_visible_virtcol = first_visible_virtcol + window_width
 
   -- initialize the grid
+  ---@type {char: string, hl_group: string}[][]
   local grid = {}
   for i = 1, vim.api.nvim_win_get_height(window) do
     grid[i] = {}
@@ -79,62 +80,59 @@ M.load_base_grid = function(window, buffer)
   end
   local data = vim.api.nvim_buf_get_lines(buffer, vertical_range.start, vertical_range.end_, true)
 
-  ---@type string?
-  local hl_group
-
   -- update with buffer data
   for i, line in ipairs(data) do
-    -- *col* is the column counter, while *chars_processed*
-    -- is the counter for UTF-8 symbols being processed
+    local jj = 0
     local col = 0
-    local chars_processed = 0
+    local virtcol = 0
 
-    -- NOTE(libro): Since we need to iterate over (possibly)
-    --   multibyte symbols we need to know first column's byte index
-    local first_byte_pos = vim.fn.getpos(tostring(vertical_range.start + i - 1))[3]
+    ---@type integer
+    local char_screen_col_start
 
-    -- TODO(libro): Check it when invalid UTF-8 bytes are present in the line
-    for utf8_char in line:sub(first_byte_pos, -1):gmatch("[\x01-\x7F\xC2-\xF4%z][\x80-\xBF]*") do
-      ---@type string[]
-      local symbols = {}
+    ---@type integer
+    local char_screen_col_end
 
-      local char_display_width = vim.fn.strdisplaywidth(utf8_char, horizontal_range.start + col)
+    while true do
+      col = col + 1
+      virtcol = virtcol + 1
+      char_screen_col_start, char_screen_col_end =
+        unpack(vim.fn.virtcol({ vertical_range.start + i, virtcol }, 1, window))
+      if char_screen_col_start == 0 and char_screen_col_end == 0 or char_screen_col_start > last_visible_virtcol then
+        break
+      end
 
-      if #utf8_char == 1 and utf8_char:byte(1, 1) == 0x09 then
-        -- If it's tab (09h, \t), then ask *strdisplaywidth()* how many columns
-        -- it's occupying in the initial line (respecting softtab options etc.)
-        -- and then replace it with corresponding amount of spaces
-        for _ = 1, char_display_width do
-          hl_group = ""
-          symbols[#symbols + 1] = " "
+      ---@type string
+      local char = vim.fn.strcharpart(line, col - 1, 1)
+      if char == "" then
+        break
+      end
+      virtcol = virtcol + #char - 1
+
+      if char_screen_col_end < first_visible_virtcol then
+        goto to_next_char
+      end
+      local columns_occupied = char_screen_col_end - char_screen_col_start + 1
+
+      if columns_occupied > 1 then
+        local is_tab = char == "\t"
+        local replacer = is_tab and " " or "@"
+        local hl_group = is_tab and "" or "WarningMsg"
+        for _ = math.max(first_visible_virtcol, char_screen_col_start), char_screen_col_end do
+          jj = jj + 1
+          if jj > window_width then
+            goto to_next_line
+          end
+          grid[i][jj].char = replacer
+          grid[i][jj].hl_group = hl_group
         end
-      elseif char_display_width == 1 then
-        symbols[#symbols + 1] = utf8_char
-        hl_group = nil
       else
-        -- If symbol occupies more than one cell (column)
-        -- then also replace it with something meaningful (?)
-        -- TODO(libro): Make replacers actually meaningful :)
-        local replacer = "@"
-        hl_group = "WarningMsg"
-        for _ = 1, char_display_width do
-          symbols[#symbols + 1] = replacer
-        end
+        jj = jj + 1
+        grid[i][jj].char = char
+        grid[i][jj].hl_group = get_dominant_hl_group(buffer, vertical_range.start + i, virtcol)
       end
-
-      chars_processed = chars_processed + 1
-      for _, symbol in ipairs(symbols) do
-        col = col + 1
-        if col > window_width then
-          goto to_another_line
-        end
-
-        grid[i][col].char = symbol
-        grid[i][col].hl_group = hl_group
-          or get_dominant_hl_group(buffer, vertical_range.start + i, horizontal_range.start + chars_processed)
-      end
+      ::to_next_char::
     end
-    ::to_another_line::
+    ::to_next_line::
   end
   return grid
 end
