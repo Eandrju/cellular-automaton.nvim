@@ -55,8 +55,16 @@ M.render_frame = function(grid)
   -- update highlights
   vim.api.nvim_buf_clear_namespace(buffnr, namespace, 0, -1)
   for i, row in ipairs(grid) do
+    local offset = 0
     for j, cell in ipairs(row) do
-      vim.api.nvim_buf_add_highlight(buffnr, namespace, cell.hl_group or "", i - 1, j - 1, j)
+      local char_len = string.len(cell.char)
+      local col_start = j - 1 + offset
+      if cell.hl_group and cell.hl_group ~= "" then
+        vim.api.nvim_buf_add_highlight(buffnr, namespace, cell.hl_group, i - 1, col_start, col_start + char_len)
+      end
+      if char_len > 1 then
+        offset = offset + char_len - 1
+      end
     end
   end
   -- swap buffers

@@ -85,6 +85,7 @@ M.load_base_grid = function(window, buffer)
     local jj = 0
     local col = 0
     local virtcol = 0
+    local lineno = vertical_range.start + i
 
     ---@type integer
     local char_screen_col_start
@@ -95,8 +96,7 @@ M.load_base_grid = function(window, buffer)
     while true do
       col = col + 1
       virtcol = virtcol + 1
-      char_screen_col_start, char_screen_col_end =
-        unpack(vim.fn.virtcol({ vertical_range.start + i, virtcol }, 1, window))
+      char_screen_col_start, char_screen_col_end = unpack(vim.fn.virtcol({ lineno, virtcol }, 1, window))
       if char_screen_col_start == 0 and char_screen_col_end == 0 or char_screen_col_start > last_visible_virtcol then
         break
       end
@@ -131,7 +131,7 @@ M.load_base_grid = function(window, buffer)
           goto to_next_line
         end
         grid[i][jj].char = char
-        grid[i][jj].hl_group = get_dominant_hl_group(buffer, vertical_range.start + i, virtcol)
+        grid[i][jj].hl_group = get_dominant_hl_group(buffer, lineno, virtcol)
       end
       ::to_next_char::
     end
