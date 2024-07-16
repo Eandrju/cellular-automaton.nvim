@@ -1,3 +1,5 @@
+local unpack = unpack or table.unpack
+
 local M = {}
 
 local get_dominant_hl_group = function(buffer, i, j)
@@ -55,7 +57,7 @@ local get_usable_window_width = function()
     ]],
     true
   )
-  return window_width
+  return tonumber(window_width)
 end
 
 M.load_base_grid = function(window, buffer)
@@ -64,12 +66,11 @@ M.load_base_grid = function(window, buffer)
     start = vim.fn.line("w0") - 1,
     end_ = vim.fn.line("w$"),
   }
-  local horizontal_range = {
-    start = vim.fn.winsaveview().leftcol,
-    end_ = vim.fn.winsaveview().leftcol + window_width,
-  }
+  local first_visible_virtcol = vim.fn.winsaveview().leftcol + 1
+  local last_visible_virtcol = first_visible_virtcol + window_width
 
   -- initialize the grid
+  ---@type {char: string, hl_group: string}[][]
   local grid = {}
   for i = 1, vim.api.nvim_win_get_height(window) do
     grid[i] = {}
@@ -81,13 +82,60 @@ M.load_base_grid = function(window, buffer)
 
   -- update with buffer data
   for i, line in ipairs(data) do
-    for j = 1, window_width do
-      local idx = horizontal_range.start + j
-      if idx <= string.len(line) then
-        grid[i][j].char = string.sub(line, idx, idx)
-        grid[i][j].hl_group = get_dominant_hl_group(buffer, vertical_range.start + i, idx)
+    local jj = 0
+    local col = 0
+    local virtcol = 0
+    local lineno = vertical_range.start + i
+
+    ---@type integer
+    local char_screen_col_start
+
+    ---@type integer
+    local char_screen_col_end
+
+    while true do
+      col = col + 1
+      virtcol = virtcol + 1
+      char_screen_col_start, char_screen_col_end = unpack(vim.fn.virtcol({ lineno, virtcol }, 1, window))
+      if char_screen_col_start == 0 and char_screen_col_end == 0 or char_screen_col_start > last_visible_virtcol then
+        break
       end
+
+      ---@type string
+      local char = vim.fn.strcharpart(line, col - 1, 1)
+      if char == "" then
+        break
+      end
+      virtcol = virtcol + #char - 1
+
+      if char_screen_col_end < first_visible_virtcol then
+        goto to_next_char
+      end
+      local columns_occupied = char_screen_col_end - char_screen_col_start + 1
+
+      if columns_occupied > 1 then
+        local is_tab = char == "\t"
+        local replacer = is_tab and " " or "@"
+        local hl_group = is_tab and "" or "WarningMsg"
+        for _ = math.max(first_visible_virtcol, char_screen_col_start), char_screen_col_end do
+          jj = jj + 1
+          if jj > window_width then
+            goto to_next_line
+          end
+          grid[i][jj].char = replacer
+          grid[i][jj].hl_group = hl_group
+        end
+      else
+        jj = jj + 1
+        if jj > window_width then
+          goto to_next_line
+        end
+        grid[i][jj].char = char
+        grid[i][jj].hl_group = get_dominant_hl_group(buffer, lineno, virtcol)
+      end
+      ::to_next_char::
     end
+    ::to_next_line::
   end
   return grid
 end
