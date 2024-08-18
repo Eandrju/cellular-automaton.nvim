@@ -71,9 +71,19 @@ describe("load_base_grid", function()
   }
 
   describe("hl_groups", function()
+    local stub = require("luassert.stub")
+    local get_captures_at_pos_orig = vim.treesitter.get_captures_at_pos
+
+    before_each(function()
+      vim.treesitter.get_captures_at_pos = stub()
+    end)
+
+    after_each(function()
+      vim.treesitter.get_captures_at_pos = get_captures_at_pos_orig
+    end)
+
     it("gets treesitter's captures for correct position", function()
-      local treesitter = mock(vim.treesitter, true)
-      treesitter.get_captures_at_pos.returns({})
+      vim.treesitter.get_captures_at_pos.returns({})
       setup_viewport(
         1,
         1,
@@ -83,8 +93,7 @@ describe("load_base_grid", function()
         { "nonumber", "norelativenumber", "signcolumn=no", "noshowmode", "noshowcmd" }
       )
       l.load_base_grid(0, 0)
-      assert.stub(treesitter.get_captures_at_pos).was_called_with(vim.api.nvim_get_current_buf(), 2, 2)
-      mock.revert(treesitter)
+      assert.stub(vim.treesitter.get_captures_at_pos).was_called_with(vim.api.nvim_get_current_buf(), 2, 2)
     end)
   end)
 
