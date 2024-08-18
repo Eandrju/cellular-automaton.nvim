@@ -60,7 +60,21 @@ local get_usable_window_width = function()
   return tonumber(window_width)
 end
 
+---Load base grid (replace multicell
+---symbols and tabs with replacers)
+---@param window integer?
+---@param buffer integer?
+---@return { char: string, hl_group: string [][]}
 M.load_base_grid = function(window, buffer)
+  if window == nil or window == 0 then
+    -- NOTE: virtcol call with *winid*
+    --   arg == 0 always returns zeros
+    window = vim.api.nvim_get_current_win()
+  end
+  if buffer == nil or buffer == 0 then
+    buffer = vim.api.nvim_get_current_buf()
+  end
+
   local window_width = get_usable_window_width()
   local vertical_range = {
     start = vim.fn.line("w0") - 1,

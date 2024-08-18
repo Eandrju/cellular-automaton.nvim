@@ -83,7 +83,7 @@ describe("load_base_grid", function()
         { "nonumber", "norelativenumber", "signcolumn=no", "noshowmode", "noshowcmd" }
       )
       l.load_base_grid(0, 0)
-      assert.stub(treesitter.get_captures_at_pos).was_called_with(0, 2, 2)
+      assert.stub(treesitter.get_captures_at_pos).was_called_with(vim.api.nvim_get_current_buf(), 2, 2)
       mock.revert(treesitter)
     end)
   end)
