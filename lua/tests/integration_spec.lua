@@ -11,11 +11,13 @@ local function setup_viewport(lines, win_options)
 end
 
 describe("integration", function()
-  local mocked_treesitter = nil
+  local mocked_vim_ts_language = nil
   before_each(function()
     require("cellular-automaton.manager").clean()
-    mocked_treesitter = mock(require("nvim-treesitter.parsers"), true)
-    mocked_treesitter.has_parser.returns(true)
+    mocked_vim_ts_language = mock(vim.treesitter.language, true)
+  end)
+  after_each(function()
+    mock.revert(mocked_vim_ts_language)
   end)
 
   it("unhandled error doesn't break next animations", function()
@@ -46,7 +48,9 @@ describe("integration", function()
   end)
 
   it("raises an error if treesitter parser is missing", function()
-    mocked_treesitter.has_parser.returns(false)
+    mocked_vim_ts_language.inspect.invokes(function()
+      error("thou shalt fail")
+    end)
     local ok, _ = pcall(vim.cmd, "CellularAutomaton make_it_rain")
     assert.is_false(ok)
   end)
