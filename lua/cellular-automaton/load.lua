@@ -127,8 +127,8 @@ M.load_base_grid = function(window, buffer)
       end
       local columns_occupied = char_screen_col_end - char_screen_col_start + 1
 
-      if columns_occupied > 1 then
-        local is_tab = char == "\t"
+      local is_tab = char == "\t"
+      if is_tab or columns_occupied > 1 then
         local replacer = is_tab and " " or "@"
         local hl_group = is_tab and "" or "WarningMsg"
         for _ = math.max(first_visible_virtcol, char_screen_col_start), char_screen_col_end do
