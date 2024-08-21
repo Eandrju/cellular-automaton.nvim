@@ -64,7 +64,7 @@ end
 ---symbols and tabs with replacers)
 ---@param window integer?
 ---@param buffer integer?
----@return { char: string, hl_group: string [][]}
+---@return { char: string, hl_group: string}[][]
 M.load_base_grid = function(window, buffer)
   if window == nil or window == 0 then
     -- NOTE: virtcol call with *winid*
