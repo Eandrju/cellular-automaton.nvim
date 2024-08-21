@@ -115,8 +115,10 @@ M.load_base_grid = function(window, buffer)
         break
       end
 
+      -- TODO: Make 2 strcharpart() calls (with *skipcc* and without it)
+      --   in order to remove all non-leading VS-15/VS-16 chars?
       ---@type string
-      local char = vim.fn.strcharpart(line, col - 1, 1)
+      local char = vim.fn.strcharpart(line, col - 1, 1, 1)
       if char == "" then
         break
       end
@@ -126,6 +128,19 @@ M.load_base_grid = function(window, buffer)
         goto to_next_char
       end
       local columns_occupied = char_screen_col_end - char_screen_col_start + 1
+      if
+        #char == 3
+        and char:byte(1) == 0XEF
+        and char:byte(2) == 0xB8
+        -- VS-15 (0xFE0E, ef b8 8e in UTF-8)
+        -- VS-16 (0xFE0F, ef b8 8f in UTF-8)
+        and (char:byte(3) == 0x8E or char:byte(3) == 0x8F)
+      then
+        -- NOTE: it's better to replace these here because once one
+        --   of then will stay after another symbol its width will
+        --   become to zero and line will become shorter
+        char = " "
+      end
 
       local is_tab = char == "\t"
       if is_tab or columns_occupied > 1 then

@@ -401,5 +401,48 @@ describe("load_base_grid", function()
         get_chars_from_grid(grid, 6, 1, 6),
       })
     end)
+
+    it("support composing characters", function()
+      local width = 10
+
+      -- Variation Selectors 15 (0xfe0e) and 16 (0xfe0f) by itself
+      -- occupies one cell - but if they'll compose with another
+      -- symbol then they will occupy zero cells
+      local vs15 = "\xef\xb8\x8e"
+      local vs16 = "\xef\xb8\x8f"
+
+      local some_stuff = string.rep("A", 2 * width)
+      setup_viewport(4, width, {
+        -- Make the view horizontally scrollable
+        vs15 .. some_stuff,
+        vs16 .. some_stuff,
+        "🤣" .. vs16 .. "AA",
+        "A" .. vs15 .. "AA",
+      }, 0, 0, { "nonu", "nornu", "nowrap" })
+
+      local grid = l.load_base_grid(0, 0)
+
+      -- Non-composed VS-15/VS-16 should be replaced with space
+      assert.same(" " .. "AA", get_chars_from_grid(grid, 1, 1, 3))
+      assert.same(" " .. "AA", get_chars_from_grid(grid, 2, 1, 3))
+      assert.same("@@AA", get_chars_from_grid(grid, 3, 1, 4))
+      -- NOTE: Yes, it's still here but since it's always will be
+      --   behind another character it will not be displayed
+      assert.same("A" .. vs15 .. "AA", get_chars_from_grid(grid, 4, 1, 3))
+
+      vim.cmd("normal! zl")
+      grid = l.load_base_grid(0, 0)
+      assert.same("AAA", get_chars_from_grid(grid, 1, 1, 3))
+      assert.same("AAA", get_chars_from_grid(grid, 2, 1, 3))
+      assert.same("@AA", get_chars_from_grid(grid, 3, 1, 3))
+      assert.same("AA ", get_chars_from_grid(grid, 4, 1, 3))
+
+      vim.cmd("normal! zl")
+      grid = l.load_base_grid(0, 0)
+      assert.same("AAA", get_chars_from_grid(grid, 1, 1, 3))
+      assert.same("AAA", get_chars_from_grid(grid, 2, 1, 3))
+      assert.same("AA ", get_chars_from_grid(grid, 3, 1, 3))
+      assert.same("A  ", get_chars_from_grid(grid, 4, 1, 3))
+    end)
   end)
 end)
