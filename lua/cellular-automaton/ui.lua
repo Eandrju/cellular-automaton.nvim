@@ -26,8 +26,8 @@ M.open_window = function(host_window)
     width = vim.api.nvim_win_get_width(host_window),
     height = vim.api.nvim_win_get_height(host_window),
     border = "none",
-    row = 0,
-    col = 0,
+    row = vim.api.nvim_win_get_position(host_window)[1],
+    col = vim.api.nvim_win_get_position(host_window)[2],
   })
   vim.api.nvim_win_set_option(window_id, "winhl", "Normal:CellularAutomatonNormal")
   vim.api.nvim_win_set_option(window_id, "list", false)
