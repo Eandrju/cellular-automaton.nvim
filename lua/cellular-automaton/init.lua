@@ -46,7 +46,7 @@ M.start_animation = function(animation_name)
   -- Make sure nvim treesitter parser exists for current buffer
   local filetype = vim.bo.filetype
   local function raise_if_parser_missing()
-    vim.treesitter.language.inspect(filetype)
+    vim.treesitter.language.inspect(vim.treesitter.language.get_lang(filetype) or filetype)
   end
   local success, err = pcall(raise_if_parser_missing)
   if not success then
