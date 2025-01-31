@@ -29,11 +29,13 @@ M.open_window = function(host_window)
     row = vim.api.nvim_win_get_position(host_window)[1],
     col = vim.api.nvim_win_get_position(host_window)[2],
   })
-  vim.api.nvim_win_set_option(window_id, "winhl", "Normal:CellularAutomatonNormal")
-  vim.api.nvim_win_set_option(window_id, "list", false)
+
+  vim.wo[window_id].winhl = "Normal:CellularAutomatonNormal"
+  vim.wo[window_id].list = false
   return window_id, buffers
 end
 
+---@param grid {char: string, hl_group: string}[][]
 M.render_frame = function(grid)
   -- quit if animation already interrupted
   if window_id == nil or not vim.api.nvim_win_is_valid(window_id) then
@@ -53,8 +55,16 @@ M.render_frame = function(grid)
   -- update highlights
   vim.api.nvim_buf_clear_namespace(buffnr, namespace, 0, -1)
   for i, row in ipairs(grid) do
+    local offset = 0
     for j, cell in ipairs(row) do
-      vim.api.nvim_buf_add_highlight(buffnr, namespace, cell.hl_group or "", i - 1, j - 1, j)
+      local char_len = string.len(cell.char)
+      local col_start = j - 1 + offset
+      if cell.hl_group and cell.hl_group ~= "" then
+        vim.api.nvim_buf_add_highlight(buffnr, namespace, cell.hl_group, i - 1, col_start, col_start + char_len)
+      end
+      if char_len > 1 then
+        offset = offset + char_len - 1
+      end
     end
   end
   -- swap buffers
